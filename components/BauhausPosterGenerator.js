@@ -135,7 +135,7 @@ export default function BauhausPosterGenerator() {
           const isHovered = hoveredShape?.id === shapeId
           const fadeValue = hoveredShape?.fadeValue || 1
 
-          // Escolher tipo de forma
+          // Escolher tipo de forma (9 + 4 formas combinadas = 13 tipos)
           const shapeTypeIdx = Math.floor(seededRandom() * 13)
 
           // Armazenar informações da forma
@@ -227,24 +227,52 @@ export default function BauhausPosterGenerator() {
               ctx.arc(x, y + GRID_SIZE/2, GRID_SIZE/2, -Math.PI/2, Math.PI/2)
               ctx.fill()
               break
-            case 9: // Quarter circle top left
+            case 9: // Quarter circle + triangle (top-left)
+              // Desenhar quarto de círculo no canto superior esquerdo
               ctx.beginPath()
-              ctx.arc(x + GRID_SIZE, y + GRID_SIZE, GRID_SIZE, Math.PI, Math.PI + Math.PI/2)
+              ctx.arc(x, y, GRID_SIZE, 0, Math.PI/2)
+              ctx.fill()
+              // Desenhar triângulo no restante
+              ctx.beginPath()
+              ctx.moveTo(x + GRID_SIZE, y)
+              ctx.lineTo(x + GRID_SIZE, y + GRID_SIZE)
+              ctx.lineTo(x, y + GRID_SIZE)
               ctx.fill()
               break
-            case 10: // Quarter circle top right
-              ctx.beginPath()
-              ctx.arc(x, y + GRID_SIZE, GRID_SIZE, Math.PI + Math.PI/2, 2 * Math.PI)
-              ctx.fill()
-              break
-            case 11: // Quarter circle bottom left
+            case 10: // Quarter circle + triangle (top-right)
+              // Desenhar quarto de círculo no canto superior direito
               ctx.beginPath()
               ctx.arc(x + GRID_SIZE, y, GRID_SIZE, Math.PI/2, Math.PI)
               ctx.fill()
-              break
-            case 12: // Quarter circle bottom right
+              // Desenhar triângulo no restante
               ctx.beginPath()
-              ctx.arc(x, y, GRID_SIZE, 0, Math.PI/2)
+              ctx.moveTo(x, y)
+              ctx.lineTo(x, y + GRID_SIZE)
+              ctx.lineTo(x + GRID_SIZE, y + GRID_SIZE)
+              ctx.fill()
+              break
+            case 11: // Quarter circle + triangle (bottom-left)
+              // Desenhar quarto de círculo no canto inferior esquerdo
+              ctx.beginPath()
+              ctx.arc(x, y + GRID_SIZE, GRID_SIZE, -Math.PI/2, 0)
+              ctx.fill()
+              // Desenhar triângulo no restante
+              ctx.beginPath()
+              ctx.moveTo(x, y)
+              ctx.lineTo(x + GRID_SIZE, y)
+              ctx.lineTo(x + GRID_SIZE, y + GRID_SIZE)
+              ctx.fill()
+              break
+            case 12: // Quarter circle + triangle (bottom-right)
+              // Desenhar quarto de círculo no canto inferior direito
+              ctx.beginPath()
+              ctx.arc(x + GRID_SIZE, y + GRID_SIZE, GRID_SIZE, Math.PI, -Math.PI/2)
+              ctx.fill()
+              // Desenhar triângulo no restante
+              ctx.beginPath()
+              ctx.moveTo(x, y)
+              ctx.lineTo(x + GRID_SIZE, y)
+              ctx.lineTo(x, y + GRID_SIZE)
               ctx.fill()
               break
           }
