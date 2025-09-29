@@ -344,9 +344,7 @@ export default function BauhausSketch() {
           {multiplyMode ? 'Blend Normal' : 'Blend Multiply'}
         </button>
 
-        <div style={{ width: '100%', fontSize: '12px', color: '#666', marginTop: '10px' }}>
-          Paletas (ou teclas 1-8):
-        </div>
+        
 
         <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
           {[0,1,2,3,4,5,6,7].map(idx => (
@@ -376,7 +374,7 @@ const buttonStyle = {
   color: 'white',
   cursor: 'pointer',
   fontSize: '12px',
-  fontFamily: 'Nimbus Sans, Arial, sans-serif'
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
 }
 
 const paletteButtonStyle = {
@@ -385,9 +383,8 @@ const paletteButtonStyle = {
   borderRadius: '3px',
   cursor: 'pointer',
   fontSize: '11px',
-  fontFamily: 'Nimbus Sans, Arial, sans-serif',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   minWidth: '25px'
-}
 }
 
 function savePng(p) {

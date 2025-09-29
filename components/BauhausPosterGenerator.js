@@ -18,18 +18,7 @@ export default function BauhausPosterGenerator() {
     }
   }, [])
 
-  // Effect para garantir que a fonte Inter carregue
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Preload da fonte Inter
-      const link = document.createElement('link')
-      link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'
-      link.rel = 'stylesheet'
-      if (!document.querySelector(`link[href="${link.href}"]`)) {
-        document.head.appendChild(link)
-      }
-    }
-  }, [])
+  // Removido carregamento de fontes para evitar problemas no build
 
   useEffect(() => {
     if (typeof window === 'undefined' || !holderRef.current) return
@@ -42,7 +31,7 @@ export default function BauhausPosterGenerator() {
       if (p && p.resizeCanvas) {
         p.resizeCanvas(window.innerWidth, window.innerHeight)
         setTimeout(() => {
-          if (p._composition) p._composition(seed)
+          if (p._composition) p._composition(seed, customText)
         }, 50)
       }
     }
@@ -97,10 +86,10 @@ export default function BauhausPosterGenerator() {
       // helpers
       const bgcol = () => p.color(248)
       
-      const composition = (rseed=1) => {
+      const composition = (rseed=1, textToShow = customText) => {
         p.randomSeed(rseed)
         p.background(bgcol())
-        
+
         const palette = PALETTES[paletteIdx % PALETTES.length]
         p.background(palette.background)
         
@@ -242,12 +231,12 @@ export default function BauhausPosterGenerator() {
           // Configurar fonte personalizada
           p.textAlign(p.CENTER, p.CENTER)
           p.textSize(36)
-          // Usar uma lista de fontes como fallback
-          p.textFont('Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif')
+          // Usar fontes do sistema para evitar problemas no build
+          p.textFont('-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif')
           p.textStyle(p.BOLD)
 
           // Medir texto para criar fundo
-          const textWidth = p.textWidth(customText)
+          const textWidth = p.textWidth(textToShow)
           const textHeight = 36
           const padding = 30
 
@@ -263,7 +252,7 @@ export default function BauhausPosterGenerator() {
 
           // Texto preto
           p.fill("#000000")
-          p.text(customText, textX, textY)
+          p.text(textToShow, textX, textY)
         }
       }
 
@@ -271,13 +260,13 @@ export default function BauhausPosterGenerator() {
         const c = p.createCanvas(window.innerWidth, window.innerHeight)
         c.parent(holderRef.current)
         p.noLoop()
-        composition(seed)
+        composition(seed, customText)
       }
 
       p.windowResized = () => {
         p.resizeCanvas(window.innerWidth, window.innerHeight)
         setTimeout(() => {
-          composition(seed)
+          composition(seed, customText)
         }, 10)
       }
 
@@ -295,15 +284,12 @@ export default function BauhausPosterGenerator() {
           const newText = prompt('Digite o texto (máx. 30 caracteres):', customText)
           if (newText !== null && newText.trim() !== '') {
             const limitedText = newText.substring(0, 30).toUpperCase()
+            console.log('Updating text from keyboard:', limitedText) // Debug
             setCustomText(limitedText)
             // Salvar no localStorage
             if (typeof window !== 'undefined') {
               localStorage.setItem('bauhaus-custom-text', limitedText)
             }
-            // Forçar re-render imediatamente
-            setTimeout(() => {
-              if (p._composition) p._composition(seed)
-            }, 100)
           }
         }
       }
@@ -328,7 +314,10 @@ export default function BauhausPosterGenerator() {
   // re-render composition when palette/seed/customText change
   useEffect(() => {
     const p = p5ref.current
-    if (p && p._composition) p._composition(seed)
+    if (p && p._composition) {
+      console.log('Re-rendering with text:', customText) // Debug
+      p._composition(seed, customText)
+    }
   }, [paletteIdx, seed, customText])
 
   const onRegen = () => { setSeed(Math.floor(Math.random()*1e7)) }
@@ -338,14 +327,10 @@ export default function BauhausPosterGenerator() {
     const newText = prompt('Digite o texto (máx. 30 caracteres):', customText)
     if (newText !== null && newText.trim() !== '') {
       const limitedText = newText.substring(0, 30).toUpperCase()
+      console.log('Updating text from button:', limitedText) // Debug
       setCustomText(limitedText)
       if (typeof window !== 'undefined') {
         localStorage.setItem('bauhaus-custom-text', limitedText)
-      }
-      // Forçar re-render
-      const p = p5ref.current
-      if (p && p._composition) {
-        setTimeout(() => p._composition(seed), 100)
       }
     }
   }
@@ -373,9 +358,7 @@ export default function BauhausPosterGenerator() {
         <button onClick={onSave} style={buttonStyle}>Salvar</button>
         <button onClick={onEditText} style={buttonStyle}>Editar Texto (T)</button>
 
-        <div style={{ width: '100%', fontSize: '12px', color: '#666', marginTop: '10px' }}>
-          Paletas (ou teclas 1-8):
-        </div>
+        
 
         <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
           {[0,1,2,3,4,5,6,7].map(idx => (
@@ -405,7 +388,7 @@ const buttonStyle = {
   color: 'white',
   cursor: 'pointer',
   fontSize: '12px',
-  fontFamily: 'Inter, sans-serif'
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
 }
 
 const paletteButtonStyle = {
@@ -414,7 +397,7 @@ const paletteButtonStyle = {
   borderRadius: '3px',
   cursor: 'pointer',
   fontSize: '11px',
-  fontFamily: 'Inter, sans-serif',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   minWidth: '25px'
 }
 
