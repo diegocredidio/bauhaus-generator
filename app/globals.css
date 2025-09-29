@@ -1,0 +1,51 @@
+*{box-sizing:border-box}
+:root{--bg:#f8f8f8;--ink:#0f172a;--muted:#475569;--bd:#cbd5e1}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;overflow:hidden}
+main{width:100vw;height:100vh;margin:0;padding:0}
+.header{display:none}
+.brand{display:none}
+.card{display:none}
+#canvas-holder{width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:fixed;top:0;left:0}
+canvas{width:100vw!important;height:100vh!important;border-radius:0!important;display:block!important}
+.hud{display:none}
+.row{display:none}
+button,select{display:none}
+label{display:none}
+.hint{display:none}
+kbd{display:none}
+.footer{display:none}
+
+/* Full screen container */
+.fullscreen-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg);
+}
+
+/* Commands overlay */
+.commands {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.command-item {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: center;
+  min-width: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
