@@ -83,18 +83,21 @@ export default function BauhausPosterGenerator() {
     ]
 
     const sketch = (p) => {
-      // helpers
-      const bgcol = () => p.color(248)
-      
       const composition = (rseed=1, textToShow = customText) => {
         p.randomSeed(rseed)
-        p.background(bgcol())
 
-        const palette = PALETTES[paletteIdx % PALETTES.length]
-        p.background(palette.background)
+        const palette = PALETTES[paletteIdx % PALETTES.length] || PALETTES[0]
+        if (palette && palette.background) {
+          p.background(palette.background)
+        } else {
+          p.background("#E8E8E8") // fallback background
+        }
         
         // pickCol function with current palette
         const pickCol = (k) => {
+          if (!palette || !palette.colors || palette.colors.length === 0) {
+            return p.color("#000000") // fallback color
+          }
           const c = palette.colors[k % palette.colors.length]
           return p.color(c)
         }
