@@ -6,6 +6,30 @@ export default function BauhausPosterGenerator() {
   const p5ref = useRef(null)
   const [paletteIdx, setPaletteIdx] = useState(0)
   const [seed, setSeed] = useState(12345)
+  const [customText, setCustomText] = useState('BAUHAUS')
+
+  // Effect para carregar texto do localStorage após componente montar
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedText = localStorage.getItem('bauhaus-custom-text')
+      if (savedText) {
+        setCustomText(savedText)
+      }
+    }
+  }, [])
+
+  // Effect para garantir que a fonte Inter carregue
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Preload da fonte Inter
+      const link = document.createElement('link')
+      link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'
+      link.rel = 'stylesheet'
+      if (!document.querySelector(`link[href="${link.href}"]`)) {
+        document.head.appendChild(link)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined' || !holderRef.current) return
@@ -215,14 +239,15 @@ export default function BauhausPosterGenerator() {
           const textX = p.random(margin, p.width - margin)
           const textY = p.random(margin, p.height - margin)
 
-          // Configurar fonte
+          // Configurar fonte personalizada
           p.textAlign(p.CENTER, p.CENTER)
           p.textSize(36)
-          p.textFont('Nimbus Sans, Arial, sans-serif')
+          // Usar uma lista de fontes como fallback
+          p.textFont('Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif')
           p.textStyle(p.BOLD)
 
           // Medir texto para criar fundo
-          const textWidth = p.textWidth("BAUHAUS")
+          const textWidth = p.textWidth(customText)
           const textHeight = 36
           const padding = 30
 
@@ -238,7 +263,7 @@ export default function BauhausPosterGenerator() {
 
           // Texto preto
           p.fill("#000000")
-          p.text("BAUHAUS", textX, textY)
+          p.text(customText, textX, textY)
         }
       }
 
@@ -265,6 +290,21 @@ export default function BauhausPosterGenerator() {
         } else if (p.key >= '1' && p.key <= '8') {
           const idx = parseInt(p.key, 10) - 1
           setPaletteIdx(idx)
+        } else if (p.key === 't' || p.key === 'T') {
+          // Abrir caixa de diálogo para editar texto
+          const newText = prompt('Digite o texto (máx. 30 caracteres):', customText)
+          if (newText !== null && newText.trim() !== '') {
+            const limitedText = newText.substring(0, 30).toUpperCase()
+            setCustomText(limitedText)
+            // Salvar no localStorage
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('bauhaus-custom-text', limitedText)
+            }
+            // Forçar re-render imediatamente
+            setTimeout(() => {
+              if (p._composition) p._composition(seed)
+            }, 100)
+          }
         }
       }
 
@@ -285,15 +325,30 @@ export default function BauhausPosterGenerator() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [holderRef])
 
-  // re-render composition when palette/seed change
+  // re-render composition when palette/seed/customText change
   useEffect(() => {
     const p = p5ref.current
     if (p && p._composition) p._composition(seed)
-  }, [paletteIdx, seed])
+  }, [paletteIdx, seed, customText])
 
   const onRegen = () => { setSeed(Math.floor(Math.random()*1e7)) }
   const onSave = () => { const p = p5ref.current; if (p && p._savePng) p._savePng() }
   const onPalette = (idx) => { setPaletteIdx(idx) }
+  const onEditText = () => {
+    const newText = prompt('Digite o texto (máx. 30 caracteres):', customText)
+    if (newText !== null && newText.trim() !== '') {
+      const limitedText = newText.substring(0, 30).toUpperCase()
+      setCustomText(limitedText)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('bauhaus-custom-text', limitedText)
+      }
+      // Forçar re-render
+      const p = p5ref.current
+      if (p && p._composition) {
+        setTimeout(() => p._composition(seed), 100)
+      }
+    }
+  }
 
   return (
     <div className="fullscreen-container">
@@ -301,6 +356,7 @@ export default function BauhausPosterGenerator() {
       <div className="commands">
         <div className="command-item">R</div>
         <div className="command-item">S</div>
+        <div className="command-item">T</div>
         <div className="command-item">1-8</div>
       </div>
 
@@ -315,6 +371,7 @@ export default function BauhausPosterGenerator() {
       }}>
         <button onClick={onRegen} style={buttonStyle}>Regenerar</button>
         <button onClick={onSave} style={buttonStyle}>Salvar</button>
+        <button onClick={onEditText} style={buttonStyle}>Editar Texto (T)</button>
 
         <div style={{ width: '100%', fontSize: '12px', color: '#666', marginTop: '10px' }}>
           Paletas (ou teclas 1-8):
@@ -348,7 +405,7 @@ const buttonStyle = {
   color: 'white',
   cursor: 'pointer',
   fontSize: '12px',
-  fontFamily: 'Nimbus Sans, Arial, sans-serif'
+  fontFamily: 'Inter, sans-serif'
 }
 
 const paletteButtonStyle = {
@@ -357,7 +414,7 @@ const paletteButtonStyle = {
   borderRadius: '3px',
   cursor: 'pointer',
   fontSize: '11px',
-  fontFamily: 'Nimbus Sans, Arial, sans-serif',
+  fontFamily: 'Inter, sans-serif',
   minWidth: '25px'
 }
 
