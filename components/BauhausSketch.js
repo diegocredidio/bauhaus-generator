@@ -275,13 +275,11 @@ export default function BauhausSketch() {
         if (p.key === 'r' || p.key === 'R') {
           const s = Math.floor(Math.random() * 1e7)
           setSeed(s)
-          composition(s)
         } else if (p.key === 's' || p.key === 'S') {
           savePng(p)
         } else if (p.key >= '1' && p.key <= '8') {
           const idx = parseInt(p.key, 10) - 1
           setPaletteIdx(idx)
-          composition(seed)
         } else if (p.key === 'm' || p.key === 'M') {
           setMultiplyMode(v => !v)
         }
@@ -313,7 +311,7 @@ export default function BauhausSketch() {
   const onRegen = () => { setSeed(Math.floor(Math.random()*1e7)) }
   const onSave = () => { const p = p5ref.current; if (p && p._savePng) p._savePng() }
   const onBlend = () => setMultiplyMode(v => !v)
-  const onPalette = (e) => setPaletteIdx(parseInt(e.target.value, 10))
+  const onPalette = (idx) => { setPaletteIdx(idx) }
 
   return (
     <div className="fullscreen-container">
@@ -324,8 +322,72 @@ export default function BauhausSketch() {
         <div className="command-item">S</div>
         <div className="command-item">1-8</div>
       </div>
+
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        display: 'flex',
+        gap: '10px',
+        flexWrap: 'wrap',
+        maxWidth: '200px'
+      }}>
+        <button onClick={onRegen} style={buttonStyle}>Regenerar</button>
+        <button onClick={onSave} style={buttonStyle}>Salvar</button>
+        <button
+          onClick={onBlend}
+          style={{
+            ...buttonStyle,
+            background: multiplyMode ? '#ff6b35' : '#007acc'
+          }}
+        >
+          {multiplyMode ? 'Blend Normal' : 'Blend Multiply'}
+        </button>
+
+        <div style={{ width: '100%', fontSize: '12px', color: '#666', marginTop: '10px' }}>
+          Paletas (ou teclas 1-8):
+        </div>
+
+        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+          {[0,1,2,3,4,5,6,7].map(idx => (
+            <button
+              key={idx}
+              onClick={() => onPalette(idx)}
+              style={{
+                ...paletteButtonStyle,
+                background: paletteIdx === idx ? '#007acc' : '#f0f0f0',
+                color: paletteIdx === idx ? 'white' : 'black'
+              }}
+            >
+              {idx + 1}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   )
+}
+
+const buttonStyle = {
+  padding: '8px 12px',
+  border: 'none',
+  borderRadius: '4px',
+  background: '#007acc',
+  color: 'white',
+  cursor: 'pointer',
+  fontSize: '12px',
+  fontFamily: 'Nimbus Sans, Arial, sans-serif'
+}
+
+const paletteButtonStyle = {
+  padding: '6px 10px',
+  border: '1px solid #ccc',
+  borderRadius: '3px',
+  cursor: 'pointer',
+  fontSize: '11px',
+  fontFamily: 'Nimbus Sans, Arial, sans-serif',
+  minWidth: '25px'
+}
 }
 
 function savePng(p) {

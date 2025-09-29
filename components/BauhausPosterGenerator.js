@@ -25,47 +25,47 @@ export default function BauhausPosterGenerator() {
     
     window.addEventListener('resize', handleResize)
 
-    // Paletas autênticamente inspiradas no Bauhaus
+    // Paletas baseadas na imagem de referência do Bauhaus
     const PALETTES = [
-      // Paleta Bauhaus Clássica - Cores primárias + preto/branco
+      // Paleta 1 - Cores primárias clássicas
+      {
+        background: "#E8E8E8", // Cinza claro como na imagem
+        colors: ["#FF0000", "#0066CC", "#FFD700", "#000000", "#FFFFFF", "#32CD32", "#FF7F00"]
+      },
+      // Paleta 2 - Tons terrosos
+      {
+        background: "#F5F5DC",
+        colors: ["#8B4513", "#4682B4", "#DAA520", "#2F4F4F", "#FFFFFF", "#228B22", "#CD5C5C"]
+      },
+      // Paleta 3 - Vibrante
       {
         background: "#FFFFFF",
-        colors: ["#FF0000", "#0000FF", "#FFFF00", "#000000", "#E5E5E5"]
+        colors: ["#DC143C", "#1E90FF", "#32CD32", "#FFD700", "#FF7F00", "#9370DB", "#000000"]
       },
-      // Paleta Kandinsky - Vermelho dominante
+      // Paleta 4 - Minimalista
       {
-        background: "#DC143C",
-        colors: ["#FFFFFF", "#000000", "#FFD700", "#4169E1", "#228B22"]
+        background: "#F8F8F8",
+        colors: ["#000000", "#FF0000", "#0000FF", "#FFFF00", "#FFFFFF", "#808080", "#696969"]
       },
-      // Paleta Paul Klee - Tons terrosos e vibrantes
+      // Paleta 5 - Oceano
       {
-        background: "#F5F5DC", // Bege
-        colors: ["#B22222", "#4682B4", "#DAA520", "#2F4F4F", "#8B4513"]
+        background: "#E0F6FF",
+        colors: ["#006994", "#87CEEB", "#4682B4", "#191970", "#FFFFFF", "#20B2AA", "#FFD700"]
       },
-      // Paleta De Stijl - Minimalista geométrica
+      // Paleta 6 - Outono
       {
-        background: "#000000",
-        colors: ["#FF0000", "#0000FF", "#FFFF00", "#FFFFFF", "#808080"]
+        background: "#FFF8DC",
+        colors: ["#FF7F00", "#DAA520", "#B22222", "#8B4513", "#FFFFFF", "#2F4F4F", "#32CD32"]
       },
-      // Paleta Construtivista - Vermelho revolução
+      // Paleta 7 - Noturna
       {
-        background: "#FFFFFF",
-        colors: ["#DC143C", "#000000", "#FFD700", "#4A4A4A", "#8B0000"]
+        background: "#2C2C2C",
+        colors: ["#FFD700", "#FF6347", "#87CEEB", "#9370DB", "#FFFFFF", "#32CD32", "#FF7F00"]
       },
-      // Paleta Itten - Círculo cromático
+      // Paleta 8 - Primavera
       {
-        background: "#2F2F2F",
-        colors: ["#FF4500", "#1E90FF", "#32CD32", "#FFFFFF", "#9370DB"]
-      },
-      // Paleta Monocromática Industrial
-      {
-        background: "#F0F0F0",
-        colors: ["#1C1C1C", "#404040", "#808080", "#B0B0B0", "#E0E0E0"]
-      },
-      // Paleta Expressionista
-      {
-        background: "#1A1A1A",
-        colors: ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFFFFF"]
+        background: "#F0FFF0",
+        colors: ["#32CD32", "#00CED1", "#FF69B4", "#FFD700", "#FFFFFF", "#9370DB", "#000000"]
       }
     ]
 
@@ -86,165 +86,158 @@ export default function BauhausPosterGenerator() {
           return p.color(c)
         }
         
-        // Formas geométricas básicas
+        // Formas geométricas baseadas na imagem de referência
         const drawSquare = (x, y, size, color) => {
           p.fill(color)
           p.noStroke()
           p.rect(x, y, size, size)
         }
-        
-        const drawTriangle = (x, y, size, color) => {
+
+        const drawTriangleTopLeft = (x, y, size, color) => {
           p.fill(color)
           p.noStroke()
-          p.triangle(x, y, x + size, y, x + size/2, y + size)
+          p.triangle(x, y, x + size, y, x, y + size)
         }
-        
-        const drawQuarterCircle = (x, y, size, color, corner = 0) => {
+
+        const drawTriangleTopRight = (x, y, size, color) => {
           p.fill(color)
           p.noStroke()
-          // Ajuste na posição do arco baseado no canto
-          let arcX = x, arcY = y
-          switch(corner) {
-            case 0: arcX = x; arcY = y; break  // Canto superior esquerdo
-            case 1: arcX = x + size; arcY = y; break  // Canto superior direito
-            case 2: arcX = x + size; arcY = y + size; break  // Canto inferior direito
-            case 3: arcX = x; arcY = y + size; break  // Canto inferior esquerdo
-          }
-          p.arc(arcX, arcY, size * 2, size * 2, corner * p.PI/2, (corner + 1) * p.PI/2)
+          p.triangle(x, y, x + size, y, x + size, y + size)
         }
-        
-        const drawRectangle = (x, y, w, h, color) => {
+
+        const drawTriangleBottomLeft = (x, y, size, color) => {
           p.fill(color)
           p.noStroke()
-          p.rect(x, y, w, h)
+          p.triangle(x, y, x, y + size, x + size, y + size)
+        }
+
+        const drawTriangleBottomRight = (x, y, size, color) => {
+          p.fill(color)
+          p.noStroke()
+          p.triangle(x + size, y, x, y + size, x + size, y + size)
+        }
+
+        const drawSemicircleTop = (x, y, size, color) => {
+          p.fill(color)
+          p.noStroke()
+          p.arc(x + size/2, y + size, size, size, p.PI, p.TWO_PI)
+        }
+
+        const drawSemircleBottom = (x, y, size, color) => {
+          p.fill(color)
+          p.noStroke()
+          p.arc(x + size/2, y, size, size, 0, p.PI)
+        }
+
+        const drawSemicircleLeft = (x, y, size, color) => {
+          p.fill(color)
+          p.noStroke()
+          p.arc(x + size, y + size/2, size, size, p.PI/2, p.PI + p.PI/2)
+        }
+
+        const drawSemicircleRight = (x, y, size, color) => {
+          p.fill(color)
+          p.noStroke()
+          p.arc(x, y + size/2, size, size, -p.PI/2, p.PI/2)
+        }
+
+        const drawQuarterCircleTopLeft = (x, y, size, color) => {
+          p.fill(color)
+          p.noStroke()
+          p.arc(x + size, y + size, size * 2, size * 2, p.PI, p.PI + p.PI/2)
+        }
+
+        const drawQuarterCircleTopRight = (x, y, size, color) => {
+          p.fill(color)
+          p.noStroke()
+          p.arc(x, y + size, size * 2, size * 2, p.PI + p.PI/2, p.TWO_PI)
+        }
+
+        const drawQuarterCircleBottomLeft = (x, y, size, color) => {
+          p.fill(color)
+          p.noStroke()
+          p.arc(x + size, y, size * 2, size * 2, p.PI/2, p.PI)
+        }
+
+        const drawQuarterCircleBottomRight = (x, y, size, color) => {
+          p.fill(color)
+          p.noStroke()
+          p.arc(x, y, size * 2, size * 2, 0, p.PI/2)
         }
         
-        // Grid system aprimorado
-        const GRID_SIZE = p.random(30, 60) // Tamanho variável do grid
+        // Grid system uniforme como na imagem de referência
+        const GRID_SIZE = 60 // Tamanho fixo para uniformidade
         const COLS = Math.floor(p.width / GRID_SIZE)
         const ROWS = Math.floor(p.height / GRID_SIZE)
-        const DENSITY = p.random(0.3, 0.7) // Densidade variável de elementos
 
-        // Generate random composition with improved grid logic
+        // Densidade mais alta para preencher melhor o espaço
+        const DENSITY = 0.85
+
+        // Generate composition similar to reference image
         for (let row = 0; row < ROWS; row++) {
           for (let col = 0; col < COLS; col++) {
-            const gridX = col * GRID_SIZE
-            const gridY = row * GRID_SIZE
+            const x = col * GRID_SIZE
+            const y = row * GRID_SIZE
 
-            // Random chance to place a shape based on density
+            // Alta chance de preencher cada célula
             if (p.random(1) < DENSITY) {
-              const shapeType = Math.floor(p.random(5)) // Adicionado mais um tipo
               const colorIdx = Math.floor(p.random(palette.colors.length))
               const color = pickCol(colorIdx)
 
-              // Aleatoriedade dentro da célula do grid
-              const offsetX = p.random(-GRID_SIZE * 0.1, GRID_SIZE * 0.1)
-              const offsetY = p.random(-GRID_SIZE * 0.1, GRID_SIZE * 0.1)
-              const x = gridX + offsetX
-              const y = gridY + offsetY
+              // Array de todas as formas disponíveis
+              const shapeTypes = [
+                () => drawSquare(x, y, GRID_SIZE, color),
+                () => drawTriangleTopLeft(x, y, GRID_SIZE, color),
+                () => drawTriangleTopRight(x, y, GRID_SIZE, color),
+                () => drawTriangleBottomLeft(x, y, GRID_SIZE, color),
+                () => drawTriangleBottomRight(x, y, GRID_SIZE, color),
+                () => drawSemicircleTop(x, y, GRID_SIZE, color),
+                () => drawSemircleBottom(x, y, GRID_SIZE, color),
+                () => drawSemicircleLeft(x, y, GRID_SIZE, color),
+                () => drawSemicircleRight(x, y, GRID_SIZE, color),
+                () => drawQuarterCircleTopLeft(x, y, GRID_SIZE, color),
+                () => drawQuarterCircleTopRight(x, y, GRID_SIZE, color),
+                () => drawQuarterCircleBottomLeft(x, y, GRID_SIZE, color),
+                () => drawQuarterCircleBottomRight(x, y, GRID_SIZE, color)
+              ]
 
-              // Variação no tamanho (80% a 120% do grid)
-              const sizeVariation = p.random(0.8, 1.2)
-              const shapeSize = GRID_SIZE * sizeVariation
-
-              switch (shapeType) {
-                case 0: // Square
-                  drawSquare(x, y, shapeSize, color)
-                  break
-                case 1: // Triangle
-                  drawTriangle(x, y, shapeSize, color)
-                  break
-                case 2: // Quarter Circle
-                  const corner = Math.floor(p.random(4))
-                  drawQuarterCircle(x, y, shapeSize/2, color, corner)
-                  break
-                case 3: // Rectangle (horizontal or vertical)
-                  if (p.random(1) < 0.5) {
-                    drawRectangle(x, y, shapeSize, shapeSize/2, color)
-                  } else {
-                    drawRectangle(x, y, shapeSize/2, shapeSize, color)
-                  }
-                  break
-                case 4: // Círculo completo (novo)
-                  p.fill(color)
-                  p.noStroke()
-                  p.ellipse(x + shapeSize/2, y + shapeSize/2, shapeSize * 0.8)
-                  break
-              }
+              // Escolher uma forma aleatoriamente
+              const randomShape = p.random(shapeTypes)
+              randomShape()
             }
           }
         }
         
-        // Elementos maiores organizados no grid principal
-        const LARGE_GRID_COLS = 3
-        const LARGE_GRID_ROWS = 2
-        const LARGE_CELL_WIDTH = p.width / LARGE_GRID_COLS
-        const LARGE_CELL_HEIGHT = p.height / LARGE_GRID_ROWS
+        // Texto "BAUHAUS" com especificações exatas
+        if (p.random(1) < 0.9) { // 90% de chance de mostrar o texto
+          // Posição aleatória mas com margens
+          const margin = 100
+          const textX = p.random(margin, p.width - margin)
+          const textY = p.random(margin, p.height - margin)
 
-        const numLargeShapes = Math.floor(2 + p.random(3))
-
-        for (let i = 0; i < numLargeShapes; i++) {
-          // Escolher célula aleatoriamente
-          const cellCol = Math.floor(p.random(LARGE_GRID_COLS))
-          const cellRow = Math.floor(p.random(LARGE_GRID_ROWS))
-
-          const cellX = cellCol * LARGE_CELL_WIDTH
-          const cellY = cellRow * LARGE_CELL_HEIGHT
-
-          // Posição aleatória dentro da célula
-          const size = p.random(80, Math.min(LARGE_CELL_WIDTH, LARGE_CELL_HEIGHT) * 0.6)
-          const x = cellX + p.random(LARGE_CELL_WIDTH - size)
-          const y = cellY + p.random(LARGE_CELL_HEIGHT - size)
-
-          const colorIdx = Math.floor(p.random(palette.colors.length))
-          const color = pickCol(colorIdx)
-
-          // Adicionar transparência para sobreposição interessante
-          color.setAlpha(180)
-
-          const shapeType = Math.floor(p.random(4))
-          switch (shapeType) {
-            case 0:
-              drawSquare(x, y, size, color)
-              break
-            case 1:
-              drawTriangle(x, y, size, color)
-              break
-            case 2:
-              const corner = Math.floor(p.random(4))
-              drawQuarterCircle(x, y, size/2, color, corner)
-              break
-            case 3:
-              p.fill(color)
-              p.noStroke()
-              p.ellipse(x + size/2, y + size/2, size)
-              break
-          }
-        }
-        
-        // Texto "BAUHAUS" posicionado no grid
-        if (p.random(1) < 0.8) { // 80% de chance de mostrar o texto
-          // Escolher uma célula do grid para o texto
-          const textCellCol = Math.floor(p.random(LARGE_GRID_COLS))
-          const textCellRow = Math.floor(p.random(LARGE_GRID_ROWS))
-
-          const textCellX = textCellCol * LARGE_CELL_WIDTH
-          const textCellY = textCellRow * LARGE_CELL_HEIGHT
-
-          const textX = textCellX + LARGE_CELL_WIDTH/2
-          const textY = textCellY + LARGE_CELL_HEIGHT/2
-
+          // Configurar fonte
           p.textAlign(p.CENTER, p.CENTER)
-          p.textSize(p.random(24, 42))
-          p.textFont('Arial, sans-serif')
+          p.textSize(36)
+          p.textFont('Nimbus Sans, Arial, sans-serif')
+          p.textStyle(p.BOLD)
 
-          // Fundo do texto para contraste
-          p.fill(palette.background)
+          // Medir texto para criar fundo
+          const textWidth = p.textWidth("BAUHAUS")
+          const textHeight = 36
+          const padding = 30
+
+          // Fundo branco com padding de 30px
+          p.fill("#FFFFFF")
           p.noStroke()
-          p.rect(textX - 80, textY - 25, 160, 50)
+          p.rect(
+            textX - textWidth/2 - padding,
+            textY - textHeight/2 - padding,
+            textWidth + padding * 2,
+            textHeight + padding * 2
+          )
 
-          // Texto principal
-          p.fill(palette.colors[0])
+          // Texto preto
+          p.fill("#000000")
           p.text("BAUHAUS", textX, textY)
         }
       }
@@ -267,13 +260,11 @@ export default function BauhausPosterGenerator() {
         if (p.key === 'r' || p.key === 'R') {
           const s = Math.floor(Math.random() * 1e7)
           setSeed(s)
-          composition(s)
         } else if (p.key === 's' || p.key === 'S') {
           savePng(p)
         } else if (p.key >= '1' && p.key <= '8') {
           const idx = parseInt(p.key, 10) - 1
           setPaletteIdx(idx)
-          composition(seed)
         }
       }
 
@@ -302,6 +293,7 @@ export default function BauhausPosterGenerator() {
 
   const onRegen = () => { setSeed(Math.floor(Math.random()*1e7)) }
   const onSave = () => { const p = p5ref.current; if (p && p._savePng) p._savePng() }
+  const onPalette = (idx) => { setPaletteIdx(idx) }
 
   return (
     <div className="fullscreen-container">
@@ -311,8 +303,62 @@ export default function BauhausPosterGenerator() {
         <div className="command-item">S</div>
         <div className="command-item">1-8</div>
       </div>
+
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        display: 'flex',
+        gap: '10px',
+        flexWrap: 'wrap',
+        maxWidth: '200px'
+      }}>
+        <button onClick={onRegen} style={buttonStyle}>Regenerar</button>
+        <button onClick={onSave} style={buttonStyle}>Salvar</button>
+
+        <div style={{ width: '100%', fontSize: '12px', color: '#666', marginTop: '10px' }}>
+          Paletas (ou teclas 1-8):
+        </div>
+
+        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+          {[0,1,2,3,4,5,6,7].map(idx => (
+            <button
+              key={idx}
+              onClick={() => onPalette(idx)}
+              style={{
+                ...paletteButtonStyle,
+                background: paletteIdx === idx ? '#007acc' : '#f0f0f0',
+                color: paletteIdx === idx ? 'white' : 'black'
+              }}
+            >
+              {idx + 1}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   )
+}
+
+const buttonStyle = {
+  padding: '8px 12px',
+  border: 'none',
+  borderRadius: '4px',
+  background: '#007acc',
+  color: 'white',
+  cursor: 'pointer',
+  fontSize: '12px',
+  fontFamily: 'Nimbus Sans, Arial, sans-serif'
+}
+
+const paletteButtonStyle = {
+  padding: '6px 10px',
+  border: '1px solid #ccc',
+  borderRadius: '3px',
+  cursor: 'pointer',
+  fontSize: '11px',
+  fontFamily: 'Nimbus Sans, Arial, sans-serif',
+  minWidth: '25px'
 }
 
 function savePng(p) {
