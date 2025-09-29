@@ -24,10 +24,10 @@ export default function BauhausPosterGenerator() {
       background: "#E8E8E8", // Cinza claro como na imagem
       colors: ["#FF0000", "#0066CC", "#FFD700", "#000000", "#FFFFFF", "#32CD32", "#FF7F00"]
     },
-    // Paleta 2 - Tons terrosos
+    // Paleta 2 - Azul e Roxo (baseada na imagem)
     {
-      background: "#F5F5DC",
-      colors: ["#8B4513", "#4682B4", "#DAA520", "#2F4F4F", "#FFFFFF", "#228B22", "#CD5C5C"]
+      background: "#2E3A5F", // Azul escuro do fundo
+      colors: ["#4A90E2", "#6A7FDB", "#8B5CF6", "#A855F7", "#3B82F6", "#60A5FA", "#FFFFFF"]
     },
     // Paleta 3 - Vibrante
     {
