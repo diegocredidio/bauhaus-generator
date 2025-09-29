@@ -6,6 +6,11 @@ export default function BauhausPosterGenerator() {
   const [paletteIdx, setPaletteIdx] = useState(0)
   const [seed, setSeed] = useState(12345)
   const [customText, setCustomText] = useState('BAUHAUS')
+  const [shapes, setShapes] = useState([]) // Array para armazenar todas as formas
+  const [hoveredShape, setHoveredShape] = useState(null) // Forma sendo hovered
+  const [hiddenShapes, setHiddenShapes] = useState(new Set()) // Formas clicadas (permanentemente ocultas)
+  const [isDragging, setIsDragging] = useState(false) // Estado do drag
+  const [fadingShapes, setFadingShapes] = useState(new Map()) // Formas em animação de fade
 
   // Effect para carregar texto do localStorage após componente montar
   useEffect(() => {
@@ -81,6 +86,9 @@ export default function BauhausPosterGenerator() {
     ctx.fillStyle = palette.background || "#E8E8E8"
     ctx.fillRect(0, 0, width, height)
 
+    // Array para armazenar as formas desta composição
+    const currentShapes = []
+
     // pickCol function with current palette
     const pickCol = (k) => {
       if (!palette || !palette.colors || palette.colors.length === 0) {
@@ -89,106 +97,16 @@ export default function BauhausPosterGenerator() {
       return palette.colors[k % palette.colors.length]
     }
 
-    // Formas geométricas baseadas na imagem de referência
-    const drawSquare = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.fillRect(x, y, size, size)
-    }
-
-    const drawTriangleTopLeft = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.moveTo(x, y)
-      ctx.lineTo(x + size, y)
-      ctx.lineTo(x, y + size)
-      ctx.closePath()
-      ctx.fill()
-    }
-
-    const drawTriangleTopRight = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.moveTo(x, y)
-      ctx.lineTo(x + size, y)
-      ctx.lineTo(x + size, y + size)
-      ctx.closePath()
-      ctx.fill()
-    }
-
-    const drawTriangleBottomLeft = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.moveTo(x, y)
-      ctx.lineTo(x, y + size)
-      ctx.lineTo(x + size, y + size)
-      ctx.closePath()
-      ctx.fill()
-    }
-
-    const drawTriangleBottomRight = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.moveTo(x + size, y)
-      ctx.lineTo(x, y + size)
-      ctx.lineTo(x + size, y + size)
-      ctx.closePath()
-      ctx.fill()
-    }
-
-    const drawSemicircleTop = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.arc(x + size/2, y + size, size/2, Math.PI, 2 * Math.PI)
-      ctx.fill()
-    }
-
-    const drawSemicircleBottom = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.arc(x + size/2, y, size/2, 0, Math.PI)
-      ctx.fill()
-    }
-
-    const drawSemicircleLeft = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.arc(x + size, y + size/2, size/2, Math.PI/2, Math.PI + Math.PI/2)
-      ctx.fill()
-    }
-
-    const drawSemicircleRight = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.arc(x, y + size/2, size/2, -Math.PI/2, Math.PI/2)
-      ctx.fill()
-    }
-
-    const drawQuarterCircleTopLeft = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.arc(x + size, y + size, size, Math.PI, Math.PI + Math.PI/2)
-      ctx.fill()
-    }
-
-    const drawQuarterCircleTopRight = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.arc(x, y + size, size, Math.PI + Math.PI/2, 2 * Math.PI)
-      ctx.fill()
-    }
-
-    const drawQuarterCircleBottomLeft = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.arc(x + size, y, size, Math.PI/2, Math.PI)
-      ctx.fill()
-    }
-
-    const drawQuarterCircleBottomRight = (x, y, size, color) => {
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.arc(x, y, size, 0, Math.PI/2)
-      ctx.fill()
+    // Função para encontrar forma sob o cursor
+    const getShapeAtPosition = (mouseX, mouseY) => {
+      for (let i = shapes.length - 1; i >= 0; i--) {
+        const shape = shapes[i]
+        if (mouseX >= shape.x && mouseX <= shape.x + shape.size &&
+            mouseY >= shape.y && mouseY <= shape.y + shape.size) {
+          return shape
+        }
+      }
+      return null
     }
 
     // Grid system uniforme como na imagem de referência
@@ -210,29 +128,135 @@ export default function BauhausPosterGenerator() {
           const colorIdx = Math.floor(seededRandom() * palette.colors.length)
           const color = pickCol(colorIdx)
 
-          // Array de todas as formas disponíveis
-          const shapeTypes = [
-            () => drawSquare(x, y, GRID_SIZE, color),
-            () => drawTriangleTopLeft(x, y, GRID_SIZE, color),
-            () => drawTriangleTopRight(x, y, GRID_SIZE, color),
-            () => drawTriangleBottomLeft(x, y, GRID_SIZE, color),
-            () => drawTriangleBottomRight(x, y, GRID_SIZE, color),
-            () => drawSemicircleTop(x, y, GRID_SIZE, color),
-            () => drawSemicircleBottom(x, y, GRID_SIZE, color),
-            () => drawSemicircleLeft(x, y, GRID_SIZE, color),
-            () => drawSemicircleRight(x, y, GRID_SIZE, color),
-            () => drawQuarterCircleTopLeft(x, y, GRID_SIZE, color),
-            () => drawQuarterCircleTopRight(x, y, GRID_SIZE, color),
-            () => drawQuarterCircleBottomLeft(x, y, GRID_SIZE, color),
-            () => drawQuarterCircleBottomRight(x, y, GRID_SIZE, color)
-          ]
+          // ID único para cada forma
+          const shapeId = `${row}-${col}`
 
-          // Escolher uma forma aleatoriamente
-          const randomShape = shapeTypes[Math.floor(seededRandom() * shapeTypes.length)]
-          randomShape()
+          // Verificar se esta forma está sendo hovered
+          const isHovered = hoveredShape?.id === shapeId
+          const fadeValue = hoveredShape?.fadeValue || 1
+
+          // Escolher tipo de forma
+          const shapeTypeIdx = Math.floor(seededRandom() * 13)
+
+          // Armazenar informações da forma
+          const shapeInfo = {
+            id: shapeId,
+            x, y,
+            size: GRID_SIZE,
+            color,
+            type: shapeTypeIdx,
+            bounds: { x, y, width: GRID_SIZE, height: GRID_SIZE }
+          }
+          currentShapes.push(shapeInfo)
+
+          // Verificar se a forma está em animação de fade
+          const fadeInfo = fadingShapes.get(shapeId)
+
+          // Não desenhar se estiver permanentemente oculta
+          if (hiddenShapes.has(shapeId) && (!fadeInfo || fadeInfo.type !== 'fadeIn')) continue
+
+          // Aplicar transparência baseada no estado
+          let alpha = 1
+          if (isHovered) {
+            alpha = fadeValue
+          } else if (fadeInfo) {
+            alpha = fadeInfo.alpha
+            if (fadeInfo.alpha <= 0 && fadeInfo.type === 'fadeOut') {
+              // Shape completamente invisível durante fade out
+              continue
+            }
+          }
+
+          ctx.globalAlpha = alpha
+
+          // Desenhar a forma baseada no tipo
+          ctx.fillStyle = color
+          switch(shapeTypeIdx) {
+            case 0: // Square
+              ctx.fillRect(x, y, GRID_SIZE, GRID_SIZE)
+              break
+            case 1: // Triangle top left
+              ctx.beginPath()
+              ctx.moveTo(x, y)
+              ctx.lineTo(x + GRID_SIZE, y)
+              ctx.lineTo(x, y + GRID_SIZE)
+              ctx.closePath()
+              ctx.fill()
+              break
+            case 2: // Triangle top right
+              ctx.beginPath()
+              ctx.moveTo(x, y)
+              ctx.lineTo(x + GRID_SIZE, y)
+              ctx.lineTo(x + GRID_SIZE, y + GRID_SIZE)
+              ctx.closePath()
+              ctx.fill()
+              break
+            case 3: // Triangle bottom left
+              ctx.beginPath()
+              ctx.moveTo(x, y)
+              ctx.lineTo(x, y + GRID_SIZE)
+              ctx.lineTo(x + GRID_SIZE, y + GRID_SIZE)
+              ctx.closePath()
+              ctx.fill()
+              break
+            case 4: // Triangle bottom right
+              ctx.beginPath()
+              ctx.moveTo(x + GRID_SIZE, y)
+              ctx.lineTo(x, y + GRID_SIZE)
+              ctx.lineTo(x + GRID_SIZE, y + GRID_SIZE)
+              ctx.closePath()
+              ctx.fill()
+              break
+            case 5: // Semicircle top
+              ctx.beginPath()
+              ctx.arc(x + GRID_SIZE/2, y + GRID_SIZE, GRID_SIZE/2, Math.PI, 2 * Math.PI)
+              ctx.fill()
+              break
+            case 6: // Semicircle bottom
+              ctx.beginPath()
+              ctx.arc(x + GRID_SIZE/2, y, GRID_SIZE/2, 0, Math.PI)
+              ctx.fill()
+              break
+            case 7: // Semicircle left
+              ctx.beginPath()
+              ctx.arc(x + GRID_SIZE, y + GRID_SIZE/2, GRID_SIZE/2, Math.PI/2, Math.PI + Math.PI/2)
+              ctx.fill()
+              break
+            case 8: // Semicircle right
+              ctx.beginPath()
+              ctx.arc(x, y + GRID_SIZE/2, GRID_SIZE/2, -Math.PI/2, Math.PI/2)
+              ctx.fill()
+              break
+            case 9: // Quarter circle top left
+              ctx.beginPath()
+              ctx.arc(x + GRID_SIZE, y + GRID_SIZE, GRID_SIZE, Math.PI, Math.PI + Math.PI/2)
+              ctx.fill()
+              break
+            case 10: // Quarter circle top right
+              ctx.beginPath()
+              ctx.arc(x, y + GRID_SIZE, GRID_SIZE, Math.PI + Math.PI/2, 2 * Math.PI)
+              ctx.fill()
+              break
+            case 11: // Quarter circle bottom left
+              ctx.beginPath()
+              ctx.arc(x + GRID_SIZE, y, GRID_SIZE, Math.PI/2, Math.PI)
+              ctx.fill()
+              break
+            case 12: // Quarter circle bottom right
+              ctx.beginPath()
+              ctx.arc(x, y, GRID_SIZE, 0, Math.PI/2)
+              ctx.fill()
+              break
+          }
+
+          // Resetar transparência
+          ctx.globalAlpha = 1
         }
       }
     }
+
+    // Atualizar array de formas
+    setShapes(currentShapes)
 
     // Texto "BAUHAUS" com especificações exatas
     if (seededRandom() < 0.9) { // 90% de chance de mostrar o texto
@@ -278,11 +302,165 @@ export default function BauhausPosterGenerator() {
     drawComposition(canvas, ctx, customText)
   }
 
+  // Função para animar fade out de uma forma
+  const animateFadeOut = (shapeId) => {
+    const animate = () => {
+      setFadingShapes(prev => {
+        const current = prev.get(shapeId) || { alpha: 1, type: 'fadeOut' }
+        const newAlpha = Math.max(0, current.alpha - 0.08)
+
+        const newMap = new Map(prev)
+        if (newAlpha <= 0) {
+          newMap.delete(shapeId)
+          // Adicionar à lista de ocultos após fade completo
+          setHiddenShapes(prev => new Set(prev).add(shapeId))
+        } else {
+          newMap.set(shapeId, { alpha: newAlpha, type: 'fadeOut' })
+          requestAnimationFrame(animate)
+        }
+        return newMap
+      })
+    }
+    requestAnimationFrame(animate)
+  }
+
+  // Função para animar fade in de uma forma
+  const animateFadeIn = (shapeId) => {
+    // Remover da lista de ocultos imediatamente para começar a desenhar
+    setHiddenShapes(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(shapeId)
+      return newSet
+    })
+
+    const animate = () => {
+      setFadingShapes(prev => {
+        const current = prev.get(shapeId) || { alpha: 0, type: 'fadeIn' }
+        const newAlpha = Math.min(1, current.alpha + 0.08)
+
+        const newMap = new Map(prev)
+        if (newAlpha >= 1) {
+          newMap.delete(shapeId)
+        } else {
+          newMap.set(shapeId, { alpha: newAlpha, type: 'fadeIn' })
+          requestAnimationFrame(animate)
+        }
+        return newMap
+      })
+    }
+    requestAnimationFrame(animate)
+  }
+
   useEffect(() => {
     resizeCanvas()
 
+    let hoverTimeout = null
+    let fadeAnimation = null
+
     const handleResize = () => {
       resizeCanvas()
+    }
+
+    const handleMouseDown = (e) => {
+      if (e.button === 0) { // Botão esquerdo
+        setIsDragging(true)
+      }
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    const handleMouseMove = (e) => {
+      const canvas = canvasRef.current
+      if (!canvas) return
+
+      const rect = canvas.getBoundingClientRect()
+      const mouseX = e.clientX - rect.left
+      const mouseY = e.clientY - rect.top
+
+      // Encontrar forma sob o cursor
+      let foundShape = null
+      for (let i = shapes.length - 1; i >= 0; i--) {
+        const shape = shapes[i]
+        if (mouseX >= shape.x && mouseX <= shape.x + shape.size &&
+            mouseY >= shape.y && mouseY <= shape.y + shape.size &&
+            !hiddenShapes.has(shape.id)) {
+          foundShape = shape
+          break
+        }
+      }
+
+      // Se está arrastando e há forma sob o cursor, desaparecer com fade
+      if (isDragging && foundShape && !hiddenShapes.has(foundShape.id)) {
+        animateFadeOut(foundShape.id)
+        return
+      }
+
+      // Lógica de hover existente
+      if (!isDragging && foundShape && (!hoveredShape || hoveredShape.id !== foundShape.id)) {
+        // Iniciar fade out
+        if (fadeAnimation) cancelAnimationFrame(fadeAnimation)
+        if (hoverTimeout) clearTimeout(hoverTimeout)
+
+        let fadeValue = 1
+        const fadeOut = () => {
+          fadeValue -= 0.05
+          if (fadeValue <= 0) {
+            fadeValue = 0
+            // Após 3 segundos, fade in
+            hoverTimeout = setTimeout(() => {
+              const fadeIn = () => {
+                fadeValue += 0.05
+                if (fadeValue >= 1) {
+                  fadeValue = 1
+                  setHoveredShape(null)
+                  return
+                }
+                setHoveredShape({ ...foundShape, fadeValue })
+                fadeAnimation = requestAnimationFrame(fadeIn)
+              }
+              fadeAnimation = requestAnimationFrame(fadeIn)
+            }, 3000)
+          }
+          setHoveredShape({ ...foundShape, fadeValue })
+          if (fadeValue > 0) {
+            fadeAnimation = requestAnimationFrame(fadeOut)
+          }
+        }
+        fadeAnimation = requestAnimationFrame(fadeOut)
+
+      } else if (!isDragging && !foundShape && hoveredShape) {
+        // Mouse saiu de todas as formas
+        if (fadeAnimation) cancelAnimationFrame(fadeAnimation)
+        if (hoverTimeout) clearTimeout(hoverTimeout)
+        setHoveredShape(null)
+      }
+    }
+
+    const handleClick = (e) => {
+      const canvas = canvasRef.current
+      if (!canvas) return
+
+      const rect = canvas.getBoundingClientRect()
+      const mouseX = e.clientX - rect.left
+      const mouseY = e.clientY - rect.top
+
+      // Encontrar forma clicada
+      for (let i = shapes.length - 1; i >= 0; i--) {
+        const shape = shapes[i]
+        if (mouseX >= shape.x && mouseX <= shape.x + shape.size &&
+            mouseY >= shape.y && mouseY <= shape.y + shape.size) {
+
+          // Toggle visibilidade com animação
+          if (hiddenShapes.has(shape.id)) {
+            animateFadeIn(shape.id)
+          } else {
+            animateFadeOut(shape.id)
+          }
+          break
+        }
+      }
     }
 
     const handleKeyPress = (e) => {
@@ -306,14 +484,33 @@ export default function BauhausPosterGenerator() {
       }
     }
 
+    const canvas = canvasRef.current
+    if (canvas) {
+      canvas.addEventListener('mousemove', handleMouseMove)
+      canvas.addEventListener('click', handleClick)
+      canvas.addEventListener('mousedown', handleMouseDown)
+      canvas.addEventListener('mouseup', handleMouseUp)
+    }
+
     window.addEventListener('resize', handleResize)
     window.addEventListener('keydown', handleKeyPress)
+    // Adicionar mouse up global para capturar quando solta fora do canvas
+    window.addEventListener('mouseup', handleMouseUp)
 
     return () => {
+      if (canvas) {
+        canvas.removeEventListener('mousemove', handleMouseMove)
+        canvas.removeEventListener('click', handleClick)
+        canvas.removeEventListener('mousedown', handleMouseDown)
+        canvas.removeEventListener('mouseup', handleMouseUp)
+      }
+      if (fadeAnimation) cancelAnimationFrame(fadeAnimation)
+      if (hoverTimeout) clearTimeout(hoverTimeout)
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('keydown', handleKeyPress)
+      window.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [customText])
+  }, [customText, shapes, hoveredShape, hiddenShapes, isDragging, fadingShapes])
 
   // re-render composition when palette/seed/customText change
   useEffect(() => {
@@ -322,7 +519,7 @@ export default function BauhausPosterGenerator() {
       const ctx = canvas.getContext('2d')
       drawComposition(canvas, ctx, customText)
     }
-  }, [paletteIdx, seed, customText])
+  }, [paletteIdx, seed, customText, hoveredShape, hiddenShapes, fadingShapes])
 
   const onRegen = () => { setSeed(Math.floor(Math.random()*1e7)) }
 
