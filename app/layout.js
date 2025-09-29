@@ -10,11 +10,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="pt-br">
       <head>
-        {/* Removidas fontes externas para evitar problemas no build */}
-        <Script
-          src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"
-          strategy="beforeInteractive"
-        />
+        {/* p5.js removido - usando Canvas API nativo */}
       </head>
       <body>{children}</body>
     </html>
